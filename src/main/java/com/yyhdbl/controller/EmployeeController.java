@@ -4,6 +4,7 @@ package com.yyhdbl.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.entity.Employee;
+import com.yyhdbl.common.BaseContext;
 import com.yyhdbl.common.R;
 import com.yyhdbl.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
@@ -76,11 +77,8 @@ public class EmployeeController {
 
         //设置初始密码123456，进行md5加密
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-        //设置创建人，从前端获得当前登录着的用户的id
-        employee.setCreateUser((long) request.getSession().getAttribute("employee"));
-        employee.setUpdateUser((long) request.getSession().getAttribute("employee"));
+        Long empId = (Long) request.getSession().getAttribute("employee");
+        BaseContext.setThreadLocal(empId);
         employeeService.save(employee);
         return R.success("新增员工成功");
     }
@@ -110,21 +108,38 @@ public class EmployeeController {
 
     /**
      * 根据id更新员工信息
-     *
+        启用禁用和编辑员工都用这个方法
      * @param request
      * @param employee
      * @return
      */
     @PutMapping
     public R<String> update(HttpServletRequest request, @RequestBody Employee employee) {
-
         Long empId = (Long) request.getSession().getAttribute("employee");
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(empId);
+   /*     employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(empId);*/
+        BaseContext.setThreadLocal(empId);
         employeeService.updateById(employee);
         return R.success("员工修改成功");
-
     }
+
+    /**
+     * 根据id查询员工信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<Employee> getById(@PathVariable Long id) {
+        log.info("id={}",id.toString());
+        Employee employee = employeeService.getById(id);
+        if (employee!=null){
+            return R.success(employee);
+        }
+    return R.error("没有查询到员工信息");
+    }
+
+
+
 
 
 }
