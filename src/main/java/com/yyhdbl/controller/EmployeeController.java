@@ -3,9 +3,10 @@ package com.yyhdbl.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.itheima.reggie.entity.Employee;
+
 import com.yyhdbl.common.BaseContext;
 import com.yyhdbl.common.R;
+import com.yyhdbl.entity.Employee;
 import com.yyhdbl.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -33,15 +34,15 @@ public class EmployeeController {
      * @return
      */
     @PostMapping("/login")
-    public R<com.itheima.reggie.entity.Employee> login(HttpServletRequest request, @RequestBody com.itheima.reggie.entity.Employee employee) {
+    public R<com.yyhdbl.entity.Employee> login(HttpServletRequest request, @RequestBody com.yyhdbl.entity.Employee employee) {
 
         //md5加密
         String password = employee.getPassword();
         password = DigestUtils.md5DigestAsHex(password.getBytes());
 
-        LambdaQueryWrapper<com.itheima.reggie.entity.Employee> queryWrapper = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper<com.yyhdbl.entity.Employee> queryWrapper = new LambdaQueryWrapper<>();
         //eq是判断是否相等并查询，这里是在判断用户输入的用户名与数据库中的是否一致
-        queryWrapper.eq(com.itheima.reggie.entity.Employee::getUsername, employee.getUsername());
+        queryWrapper.eq(com.yyhdbl.entity.Employee::getUsername, employee.getUsername());
         Employee emp = employeeService.getOne(queryWrapper);
 
         if (emp == null)
