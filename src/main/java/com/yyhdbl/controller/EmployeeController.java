@@ -2,17 +2,16 @@ package com.yyhdbl.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.entity.Employee;
 import com.yyhdbl.common.R;
 import com.yyhdbl.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -84,6 +83,47 @@ public class EmployeeController {
         employee.setUpdateUser((long) request.getSession().getAttribute("employee"));
         employeeService.save(employee);
         return R.success("新增员工成功");
+    }
+
+    /**
+     * 员工分页查询
+     *
+     * @param page
+     * @param pageSize
+     * @param name
+     * @return
+     */
+    @GetMapping("/page")
+    public R<Page> page(int page, int pageSize, String name) {
+        log.info("page ={},pageSize={},name={}", page, pageSize, name);
+        //构建分页构造器
+        Page pageinfo = new Page(page, pageSize);
+        //构造条件构造器
+        LambdaQueryWrapper<Employee> lambdaQueryWrapper = new LambdaQueryWrapper();
+        //添加过滤条件
+        lambdaQueryWrapper.like(StringUtils.isNotEmpty(name), Employee::getName, name);
+        //添加排序
+        lambdaQueryWrapper.orderByDesc(Employee::getUpdateTime);
+        employeeService.page(pageinfo, lambdaQueryWrapper);
+        return R.success(pageinfo);
+    }
+
+    /**
+     * 根据id更新员工信息
+     *
+     * @param request
+     * @param employee
+     * @return
+     */
+    @PutMapping
+    public R<String> update(HttpServletRequest request, @RequestBody Employee employee) {
+
+        Long empId = (Long) request.getSession().getAttribute("employee");
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(empId);
+        employeeService.updateById(employee);
+        return R.success("员工修改成功");
+
     }
 
 
