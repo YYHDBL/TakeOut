@@ -39,19 +39,16 @@ public class EmployeeController {
         //md5加密
         String password = employee.getPassword();
         password = DigestUtils.md5DigestAsHex(password.getBytes());
-
         LambdaQueryWrapper<com.yyhdbl.entity.Employee> queryWrapper = new LambdaQueryWrapper<>();
         //eq是判断是否相等并查询，这里是在判断用户输入的用户名与数据库中的是否一致
         queryWrapper.eq(com.yyhdbl.entity.Employee::getUsername, employee.getUsername());
         Employee emp = employeeService.getOne(queryWrapper);
-
         if (emp == null)
             return R.error("用户名不存在");
         if (!emp.getPassword().equals(password))
             return R.error("密码错误");
         if (emp.getStatus() == 0)
             return R.error("员工已禁用");
-
         //把员工id存入session并返回登录成功结果
         request.getSession().setAttribute("employee", emp.getId());
         return R.success(emp);

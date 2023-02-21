@@ -52,7 +52,7 @@ public class Category implements Serializable {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
 
-
+@TableField(exist = false)
     //是否删除
     private Integer isDeleted;
 
