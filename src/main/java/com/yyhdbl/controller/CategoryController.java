@@ -2,6 +2,7 @@ package com.yyhdbl.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.yyhdbl.common.BaseContext;
 import com.yyhdbl.common.R;
 import com.yyhdbl.entity.Category;
 import com.yyhdbl.entity.Employee;
@@ -9,7 +10,10 @@ import com.yyhdbl.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @RestController
@@ -25,14 +29,17 @@ public class CategoryController {
      * @param category
      * @return
      */
-    @PutMapping
-    public R<String> save(@RequestBody Category category) {
-        categoryService.save(category);
+   @PostMapping
+    public R<String> save(HttpServletRequest request,@RequestBody Category category) {
+       Long empId = (Long) request.getSession().getAttribute("employee");
+       BaseContext.setThreadLocal(empId);
+       categoryService.save(category);
         return R.success("添加成功");
     }
 
     /**
      * 菜品分类的分页查询
+     *
      * @param page
      * @param pageSize
      * @return
@@ -50,5 +57,27 @@ public class CategoryController {
         return R.success(pageinfo);
     }
 
+    /**
+     * 菜品分类的删除操作
+     */
+    @DeleteMapping
+    public R<String> delete(Long id) {
+        categoryService.remove(id);
+        return R.success("分类信息删除成功");
+    }
+
+    /**
+     * 菜品分类的修改操作
+     * @param category
+     * @return
+     */
+   @PutMapping()
+   public R<String> update(HttpServletRequest request, @RequestBody Category category) {
+
+       Long empId = (Long) request.getSession().getAttribute("employee");
+       BaseContext.setThreadLocal(empId);
+       categoryService.updateById(category);
+       return R.success("分类信息修改成功");
+   }
 
 }
