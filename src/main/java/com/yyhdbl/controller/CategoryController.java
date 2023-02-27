@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -29,11 +30,11 @@ public class CategoryController {
      * @param category
      * @return
      */
-   @PostMapping
-    public R<String> save(HttpServletRequest request,@RequestBody Category category) {
-       Long empId = (Long) request.getSession().getAttribute("employee");
-       BaseContext.setThreadLocal(empId);
-       categoryService.save(category);
+    @PostMapping
+    public R<String> save(HttpServletRequest request, @RequestBody Category category) {
+      Long empId = (Long) request.getSession().getAttribute("employee");
+        BaseContext.setThreadLocal(empId);
+        categoryService.save(category);
         return R.success("添加成功");
     }
 
@@ -68,16 +69,37 @@ public class CategoryController {
 
     /**
      * 菜品分类的修改操作
+     *
      * @param category
      * @return
      */
-   @PutMapping()
-   public R<String> update(HttpServletRequest request, @RequestBody Category category) {
+    @PutMapping()
+    public R<String> update(HttpServletRequest request, @RequestBody Category category) {
 
-       Long empId = (Long) request.getSession().getAttribute("employee");
-       BaseContext.setThreadLocal(empId);
-       categoryService.updateById(category);
-       return R.success("分类信息修改成功");
-   }
+        Long empId = (Long) request.getSession().getAttribute("employee");
+        BaseContext.setThreadLocal(empId);
+        categoryService.updateById(category);
+        return R.success("分类信息修改成功");
+    }
+
+
+    /**
+     * 根据条件查询菜品分类数据
+     * 为下拉框提供数据
+     */
+    @GetMapping("/list")
+    public R<List<Category>> list(Category category) {
+        LambdaQueryWrapper<Category> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(category.getType() != null, Category::getType, category.getType());
+        lambdaQueryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+
+        List<Category> categoryList = categoryService.list(lambdaQueryWrapper);
+        return R.success(categoryList);
+    }
+
+
+
+
+
 
 }
