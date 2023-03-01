@@ -82,12 +82,34 @@ public class DishController {
             //根据id查询分类对象
             Category category = categoryService.getById(categoryId);
             String categoryName = category.getName();
-dishDto.setCategoryName(categoryName);
+            dishDto.setCategoryName(categoryName);
             return dishDto;//完全听不懂
         }).collect(Collectors.toList());
-
 
         dishDtoPage.setRecords(list);
         return R.success(dishDtoPage);
     }
+
+    /**
+     * 根据id查询菜品信息和对应口味信息 用于回显
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<DishDto> get(@PathVariable Long id) {
+        DishDto dishDto = dishService.getByIdWithFalvor(id);
+        return R.success(dishDto);
+    }
+
+    @PutMapping
+    public R<String> update(HttpServletRequest request, @RequestBody DishDto dishDto) {
+        Long empId = (Long) request.getSession().getAttribute("employee");
+        BaseContext.setThreadLocal(empId);
+     log.info(dishDto.toString());
+        dishService.updateWithFlavor(dishDto);
+        return R.success("菜品修改成功");
+
+    }
+
 }
