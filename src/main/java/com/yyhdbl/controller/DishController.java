@@ -106,10 +106,27 @@ public class DishController {
     public R<String> update(HttpServletRequest request, @RequestBody DishDto dishDto) {
         Long empId = (Long) request.getSession().getAttribute("employee");
         BaseContext.setThreadLocal(empId);
-     log.info(dishDto.toString());
+        log.info(dishDto.toString());
         dishService.updateWithFlavor(dishDto);
         return R.success("菜品修改成功");
-
     }
+
+    /**
+     * 根据条件查询对应的菜品数据
+     *
+     * @param dish
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List> list(Dish dish) {
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+        queryWrapper.eq(Dish::getStatus,1);//查询状态为起售卖菜品 1为起售
+        List<Dish> list = dishService.list(queryWrapper);
+
+        return R.success(list);
+    }
+
 
 }
