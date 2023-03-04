@@ -16,6 +16,7 @@ import com.yyhdbl.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -78,7 +79,6 @@ public class SetmealController {
         }).collect(Collectors.toList());//收集起来
 
 
-
         setmealDtoPage.setRecords(setmealDtos);//把重新组装好的setmealdto给setmealdtopage
 
         return R.success(setmealDtoPage);
@@ -99,5 +99,49 @@ public class SetmealController {
         return R.success("新增套餐成功");
     }
 
+
+    /**
+     * 删除套餐
+     *
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    @Transactional
+    public R<String> delete(@RequestParam List<Long> ids) {
+        setmealService.deleteWithDish(ids);
+        return R.success("套餐数据删除成功");
+    }
+
+
+    /**
+     * 起售
+     */
+    @PostMapping("/status/0")
+    public R<String> updateStatus0(@RequestParam List<Long> ids, HttpServletRequest request) {
+        LambdaQueryWrapper<Setmeal> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.in(Setmeal::getId, ids);
+        Setmeal setmeal = new Setmeal();
+        setmeal.setStatus(0);
+        Long empId = (Long) request.getSession().getAttribute("employee");
+        BaseContext.setThreadLocal(empId);
+
+        setmealService.update(setmeal, lambdaQueryWrapper);
+        return R.success("禁售成功");
+    }
+    /**
+     * 禁售
+     */
+    @PostMapping("/status/1")
+    public R<String> updateStatus1(@RequestParam List<Long> ids, HttpServletRequest request) {
+        LambdaQueryWrapper<Setmeal> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.in(Setmeal::getId, ids);
+        Setmeal setmeal = new Setmeal();
+        setmeal.setStatus(1);
+        Long empId = (Long) request.getSession().getAttribute("employee");
+        BaseContext.setThreadLocal(empId);
+        setmealService.update(setmeal, lambdaQueryWrapper);
+        return R.success("启售成功");
+    }
 
 }
