@@ -1,6 +1,7 @@
 package com.yyhdbl.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.yyhdbl.common.BaseContext;
 import com.yyhdbl.common.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
@@ -31,7 +32,9 @@ public class LoginICheckFilter implements Filter {
                 "/employee/logout",
                 "/backend/**",
                 "/front/**",
-                "/common/**"
+                "/common/**",
+                "/user/sendMsg",
+                "/user/login"
         };
 
 //判断本次请求是否需要处理
@@ -44,12 +47,24 @@ public class LoginICheckFilter implements Filter {
             return;
         }
 
-        //判断登录状态，如果已经登录 直接放行
+        //判断管理员登录状态，如果已经登录 直接放行
         if (request.getSession().getAttribute("employee") != null) {
             log.info("用户已登录,用户id为：{}",request.getSession().getAttribute("employee") );
+            Long empId = (Long) request.getSession().getAttribute("employee");
+            BaseContext.setThreadLocal(empId);
             filterChain.doFilter(request, response);
             return;
         }
+
+        //判断用户登录状态，如果已经登录 直接放行
+        if (request.getSession().getAttribute("user") != null) {
+            log.info("用户已登录,用户id为：{}",request.getSession().getAttribute("user") );
+            Long userId = (Long) request.getSession().getAttribute("user");
+            BaseContext.setThreadLocal(userId);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
 
         log.info("用户未登录");
         //如果未登录则返回未登录结果 给前端 让前端的页面跳转道登录页面
