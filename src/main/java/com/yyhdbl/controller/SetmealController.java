@@ -129,6 +129,7 @@ public class SetmealController {
         setmealService.update(setmeal, lambdaQueryWrapper);
         return R.success("禁售成功");
     }
+
     /**
      * 禁售
      */
@@ -143,5 +144,23 @@ public class SetmealController {
         setmealService.update(setmeal, lambdaQueryWrapper);
         return R.success("启售成功");
     }
+
+    /**
+     * 更具条件查询套餐数据
+     *
+     * @param setmeal
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Setmeal>> list(Setmeal setmeal) {
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId());
+        queryWrapper.eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus());
+        queryWrapper.orderByDesc(Setmeal::getUpdateTime);
+        List<Setmeal> setmeals = setmealService.list(queryWrapper);
+        return R.success(setmeals);
+
+    }
+
 
 }
