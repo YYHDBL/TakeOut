@@ -4,6 +4,7 @@ package com.yyhdbl.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yyhdbl.common.BaseContext;
 import com.yyhdbl.common.R;
+import com.yyhdbl.entity.OrderDetail;
 import com.yyhdbl.entity.ShoppingCart;
 import com.yyhdbl.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,8 @@ public class ShoppingCartController {
 
     @Autowired
     private ShoppingCartService shoppingCartService;
+    @Autowired
+    private OrderDetail orderDetail;
 
     @PostMapping("/add")
     public R<ShoppingCart> add(@RequestBody ShoppingCart shoppingCart) {
@@ -75,12 +78,13 @@ public class ShoppingCartController {
 
     /**
      * 清空购物车
+     *
      * @return
      */
     @DeleteMapping("/clean")
     public R<String> clean() {
-        LambdaQueryWrapper<ShoppingCart> queryWrapper=new LambdaQueryWrapper<>();
-        queryWrapper.eq(ShoppingCart::getUserId,BaseContext.getCurrentId());
+        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
         shoppingCartService.remove(queryWrapper);
         return R.success("清空购物车成功");
     }
