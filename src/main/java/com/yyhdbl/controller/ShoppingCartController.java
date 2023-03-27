@@ -10,6 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/shoppingCart")
@@ -42,12 +45,13 @@ public class ShoppingCartController {
         //如果已经在购物车中 则不需要重复插入 直接修改num值
         if (shoppingCartOne != null) {
             Integer number = shoppingCartOne.getNumber();
-            shoppingCartOne.setNumber(number+1);
+            shoppingCartOne.setNumber(number + 1);
             shoppingCartService.updateById(shoppingCartOne);
         }
         //如果不存在 则添加到购物车 num默认就是1
         else {
             shoppingCart.setNumber(1);
+            shoppingCart.setCreateTime(LocalDateTime.now());
             shoppingCartService.save(shoppingCart);
             shoppingCartOne = shoppingCart;
         }
@@ -55,7 +59,30 @@ public class ShoppingCartController {
         return R.success(shoppingCartOne);
     }
 
+    /**
+     * 查看购物车
+     *
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<ShoppingCart>> list() {
+        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
+        queryWrapper.orderByAsc(ShoppingCart::getCreateTime);
+        List<ShoppingCart> list = shoppingCartService.list(queryWrapper);
+        return R.success(list);
+    }
 
-
+    /**
+     * 清空购物车
+     * @return
+     */
+    @DeleteMapping("/clean")
+    public R<String> clean() {
+        LambdaQueryWrapper<ShoppingCart> queryWrapper=new LambdaQueryWrapper<>();
+        queryWrapper.eq(ShoppingCart::getUserId,BaseContext.getCurrentId());
+        shoppingCartService.remove(queryWrapper);
+        return R.success("清空购物车成功");
+    }
 
 }
